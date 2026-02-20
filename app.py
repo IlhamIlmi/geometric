@@ -9,64 +9,53 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", layout="wide")
 
 # --- INJEKSI CUSTOM CSS UMUM ---
-st.markdown("""
 <style>
     .stApp { background-color: #0e1117; }
+    
+    /* --- DESAIN KOTAK AWAL --- */
     .stat-card {
-        background-color: #2b2b2b;
-        padding: 15px;
-        border-radius: 10px;
+        background-color: #1a1a2e;
+        padding: 20px;
+        border-radius: 12px;
         text-align: center;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease-in-out; /* Ini kunci biar animasinya mulus */
     }
+
+    /* --- EFEK NGAMBANG & GLOW SAAT DISENTUH --- */
+    .stat-card:hover {
+        transform: translateY(-8px); /* Mengangkat kotak ke atas */
+        border-color: #00f2ff; /* Mengubah garis pinggir jadi warna cyan */
+        box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4); /* Memancarkan cahaya */
+        cursor: pointer;
+    }
+
     .stat-title {
         color: #888888;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: bold;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
         text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    .stat-value { font-size: 20px; font-weight: bold; margin: 0; }
-    .val-jenis { color: #bd93f9; }
-    .val-angka { color: #8be9fd; }
-    .step-card {
-        background-color: #2b2b2b;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-    .step-header {
-        color: #1a1a1a;
-        font-weight: bold;
-        padding: 8px 15px;
-        font-size: 16px;
-    }
-    .step-body {
-        padding: 15px;
-        color: white;
-        font-family: 'Consolas', monospace;
-        font-size: 15px;
-        line-height: 1.6;
-    }
-    .info-text {
-        font-family: 'Consolas', monospace;
-        font-size: 14px;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-        margin-bottom: 5px;
-    }
-    .soal-kompetisi {
-        font-size: 28px !important;
-        text-align: center;
-        color: #8be9fd;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
+    
+    .stat-value { font-size: 28px; font-weight: bold; margin: 0; }
+    
+    /* Warna Neon untuk Angka */
+    .val-cyan { color: #00f2ff; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+    .val-purple { color: #bd00ff; text-shadow: 0 0 10px rgba(189, 0, 255, 0.3); }
+    .val-green { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+
+    /* Sisanya biarkan sama seperti sebelumnya */
+    .step-card { background-color: #2b2b2b; border-radius: 12px; margin-bottom: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    .step-header { color: #1a1a1a; font-weight: bold; padding: 8px 15px; font-size: 16px; }
+    .step-body { padding: 15px; color: white; font-family: 'Consolas', monospace; font-size: 15px; line-height: 1.6; }
+    .soal-kompetisi { font-size: 28px !important; text-align: center; color: #8be9fd; margin-bottom: 15px; font-weight: bold; }
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    header { visibility: hidden !important; }
 </style>
-""", unsafe_allow_html=True)
 
 # --- FUNGSI BANTU MATEMATIKA & VISUALISASI ---
 def get_projection(p, a, b):
@@ -504,3 +493,4 @@ else:
             
             if st.session_state.comp_total > 0:
                 st.success(f"🏆 PERMAINAN SELESAI! Skor Terakhir Kamu: **{st.session_state.comp_score} BENAR** dari {st.session_state.comp_total} soal.")
+
