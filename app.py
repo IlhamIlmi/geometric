@@ -52,9 +52,6 @@ st.markdown("""
     .step-header { color: #1a1a1a; font-weight: bold; padding: 8px 15px; font-size: 16px; }
     .step-body { padding: 15px; color: white; font-family: 'Consolas', monospace; font-size: 15px; line-height: 1.6; }
     .soal-kompetisi { font-size: 28px !important; text-align: center; color: #8be9fd; margin-bottom: 15px; font-weight: bold; }
-    [data-testid="stSidebar"] { display: none !important; }
-    [data-testid="collapsedControl"] { display: none !important; }
-    header { visibility: hidden !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -183,6 +180,23 @@ def draw_triangle_plot(a, b, c, dA, dB, dC, show_alt, show_med, show_bis):
         ax.plot([C[0], D_c[0]], [C[1], D_c[1]], color='#50fa7b', linestyle=':', linewidth=2.5)
 
     ax.plot([A[0], B[0], C[0], A[0]], [A[1], B[1], C[1], A[1]], color='#4cc9f0', linewidth=3)
+    
+    # --- BAGIAN LABEL YANG SEMPAT HILANG ---
+    sq_size = max_dim * 0.05
+    if math.isclose(dA, 90, abs_tol=0.5): draw_right_angle_mpl(ax, A, C, B, sq_size)
+    if math.isclose(dB, 90, abs_tol=0.5): draw_right_angle_mpl(ax, B, C, A, sq_size)
+    if math.isclose(dC, 90, abs_tol=0.5): draw_right_angle_mpl(ax, C, A, B, sq_size)
+
+    offset = max_dim * 0.05
+    ax.text(A[0]-offset, A[1]-offset, f"A\n({dA:.0f}°)", fontsize=11, ha='right', color='white', fontweight='bold')
+    ax.text(B[0]+offset, B[1]-offset, f"B\n({dB:.0f}°)", fontsize=11, ha='left', color='white', fontweight='bold')
+    ax.text(C[0], C[1]+offset, f"C\n({dC:.0f}°)", fontsize=11, ha='center', color='white', fontweight='bold')
+
+    ax.text((B[0]+C[0])/2 + offset, (B[1]+C[1])/2, "a", fontsize=12, color="#ffffff", fontweight='bold', style='italic')
+    ax.text((A[0]+C[0])/2 - offset, (A[1]+C[1])/2, "b", fontsize=12, color='#ffffff', fontweight='bold', style='italic', ha='right')
+    ax.text((A[0]+B[0])/2, (A[1]+B[1])/2 - offset, "c", fontsize=12, color='#ffffff', fontweight='bold', style='italic', va='top')
+    # ---------------------------------------
+
     ax.set_aspect('equal')
     ax.axis('off')
     return fig
@@ -398,17 +412,17 @@ else:
 
             html_cards = f"""
             <div style="display: flex; justify-content: space-between; gap: 15px;">
-                <div class="stat-card" style="flex: 1; border: 1px solid #bd93f9;">
-                    <div class="stat-title">JENIS SEGITIGA</div>
-                    <div class="stat-value val-jenis">{jenis_sudut}<br>{jenis_sisi}</div>
-                </div>
-                <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
-                    <div class="stat-title">LUAS AREA</div>
-                    <div class="stat-value val-angka">{area:.2f}</div>
-                </div>
-                <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
+                <div class="stat-card" style="flex: 1;">
                     <div class="stat-title">KELILING</div>
-                    <div class="stat-value val-angka">{peri:.2f}</div>
+                    <div class="stat-value val-cyan">{peri:.2f}</div>
+                </div>
+                <div class="stat-card" style="flex: 1;">
+                    <div class="stat-title">LUAS AREA (HERON)</div>
+                    <div class="stat-value val-purple">{area:.2f}</div>
+                </div>
+                <div class="stat-card" style="flex: 1;">
+                    <div class="stat-title">KLASIFIKASI</div>
+                    <div class="stat-value val-green" style="font-size: 22px; line-height: 1.3;">{jenis_sudut}<br>{jenis_sisi}</div>
                 </div>
             </div>
             """
@@ -494,5 +508,3 @@ else:
             
             if st.session_state.comp_total > 0:
                 st.success(f"🏆 PERMAINAN SELESAI! Skor Terakhir Kamu: **{st.session_state.comp_score} BENAR** dari {st.session_state.comp_total} soal.")
-
-
