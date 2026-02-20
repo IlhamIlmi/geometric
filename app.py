@@ -9,6 +9,7 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", layout="wide")
 
 # --- INJEKSI CUSTOM CSS UMUM ---
+st.markdown("""
 <style>
     .stApp { background-color: #0e1117; }
     
@@ -20,14 +21,14 @@ st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", 
         text-align: center;
         margin-bottom: 20px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.4s ease-in-out; /* Ini kunci biar animasinya mulus */
+        transition: all 0.4s ease-in-out; 
     }
 
     /* --- EFEK NGAMBANG & GLOW SAAT DISENTUH --- */
     .stat-card:hover {
-        transform: translateY(-8px); /* Mengangkat kotak ke atas */
-        border-color: #00f2ff; /* Mengubah garis pinggir jadi warna cyan */
-        box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4); /* Memancarkan cahaya */
+        transform: translateY(-8px); 
+        border-color: #00f2ff; 
+        box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4); 
         cursor: pointer;
     }
 
@@ -47,7 +48,6 @@ st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", 
     .val-purple { color: #bd00ff; text-shadow: 0 0 10px rgba(189, 0, 255, 0.3); }
     .val-green { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
 
-    /* Sisanya biarkan sama seperti sebelumnya */
     .step-card { background-color: #2b2b2b; border-radius: 12px; margin-bottom: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
     .step-header { color: #1a1a1a; font-weight: bold; padding: 8px 15px; font-size: 16px; }
     .step-body { padding: 15px; color: white; font-family: 'Consolas', monospace; font-size: 15px; line-height: 1.6; }
@@ -56,6 +56,7 @@ st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", 
     [data-testid="collapsedControl"] { display: none !important; }
     header { visibility: hidden !important; }
 </style>
+""", unsafe_allow_html=True)
 
 # --- FUNGSI BANTU MATEMATIKA & VISUALISASI ---
 def get_projection(p, a, b):
@@ -493,4 +494,5 @@ else:
             
             if st.session_state.comp_total > 0:
                 st.success(f"🏆 PERMAINAN SELESAI! Skor Terakhir Kamu: **{st.session_state.comp_score} BENAR** dari {st.session_state.comp_total} soal.")
+
 
