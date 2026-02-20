@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="GeoMetric: Triangle Analyzer", page_icon="📐", layout="wide")
 
-# --- INJEKSI CUSTOM CSS ---
+# --- INJEKSI CUSTOM CSS UMUM ---
 st.markdown("""
 <style>
     .stApp { background-color: #0e1117; }
@@ -59,10 +59,11 @@ st.markdown("""
         margin-bottom: 5px;
     }
     .soal-kompetisi {
-        font-size: 24px !important;
+        font-size: 28px !important;
         text-align: center;
         color: #8be9fd;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -171,14 +172,6 @@ def draw_triangle_plot(a, b, c, dA, dB, dC, show_alt, show_med, show_bis):
         proj_A = get_projection(A, B, C)
         proj_B = get_projection(B, A, C)
         proj_C = get_projection(C, A, B)
-
-        ax.plot([B[0], proj_A[0]], [B[1], proj_A[1]], color='#555555', linestyle=':', linewidth=1.5)
-        ax.plot([C[0], proj_A[0]], [C[1], proj_A[1]], color='#555555', linestyle=':', linewidth=1.5)
-        ax.plot([A[0], proj_B[0]], [A[1], proj_B[1]], color='#555555', linestyle=':', linewidth=1.5)
-        ax.plot([C[0], proj_B[0]], [C[1], proj_B[1]], color='#555555', linestyle=':', linewidth=1.5)
-        ax.plot([A[0], proj_C[0]], [A[1], proj_C[1]], color='#555555', linestyle=':', linewidth=1.5)
-        ax.plot([B[0], proj_C[0]], [B[1], proj_C[1]], color='#555555', linestyle=':', linewidth=1.5)
-
         ax.plot([A[0], proj_A[0]], [A[1], proj_A[1]], color='#ff5555', linestyle='--', linewidth=2, label='Garis Tinggi')
         ax.plot([B[0], proj_B[0]], [B[1], proj_B[1]], color='#ff5555', linestyle='--', linewidth=2)
         ax.plot([C[0], proj_C[0]], [C[1], proj_C[1]], color='#ff5555', linestyle='--', linewidth=2)
@@ -200,41 +193,17 @@ def draw_triangle_plot(a, b, c, dA, dB, dC, show_alt, show_med, show_bis):
         ax.plot([C[0], D_c[0]], [C[1], D_c[1]], color='#50fa7b', linestyle=':', linewidth=2.5)
 
     ax.plot([A[0], B[0], C[0], A[0]], [A[1], B[1], C[1], A[1]], color='#4cc9f0', linewidth=3)
-
-    sq_size = max_dim * 0.05
-    if math.isclose(dA, 90, abs_tol=0.5): draw_right_angle_mpl(ax, A, C, B, sq_size)
-    if math.isclose(dB, 90, abs_tol=0.5): draw_right_angle_mpl(ax, B, C, A, sq_size)
-    if math.isclose(dC, 90, abs_tol=0.5): draw_right_angle_mpl(ax, C, A, B, sq_size)
-
-    offset = max_dim * 0.05
-    ax.text(A[0]-offset, A[1]-offset, f"A\n({dA:.0f}°)", fontsize=11, ha='right', color='white', fontweight='bold')
-    ax.text(B[0]+offset, B[1]-offset, f"B\n({dB:.0f}°)", fontsize=11, ha='left', color='white', fontweight='bold')
-    ax.text(C[0], C[1]+offset, f"C\n({dC:.0f}°)", fontsize=11, ha='center', color='white', fontweight='bold')
-
-    ax.text((B[0]+C[0])/2 + offset, (B[1]+C[1])/2, "a", fontsize=12, color="#ffffff", fontweight='bold', style='italic')
-    ax.text((A[0]+C[0])/2 - offset, (A[1]+C[1])/2, "b", fontsize=12, color='#ffffff', fontweight='bold', style='italic', ha='right')
-    ax.text((A[0]+B[0])/2, (A[1]+B[1])/2 - offset, "c", fontsize=12, color='#ffffff', fontweight='bold', style='italic', va='top')
-
     ax.set_aspect('equal')
     ax.axis('off')
-    
-    if show_alt or show_med or show_bis:
-        legend = ax.legend(loc='upper right', facecolor='#2b2b2b', edgecolor='gray', framealpha=0.8)
-        for text in legend.get_texts():
-            text.set_color("white")
-    
     return fig
 
-
-# --- STATE MANAGEMENT (UNTUK KUIS LATIHAN & KOMPETISI) ---
-
-# State Latihan Santai
+# --- STATE MANAGEMENT ---
 if 'quiz_q' not in st.session_state: st.session_state.quiz_q = None
 if 'quiz_ans' not in st.session_state: st.session_state.quiz_ans = None
 if 'quiz_data' not in st.session_state: st.session_state.quiz_data = None
 if 'quiz_q_type' not in st.session_state: st.session_state.quiz_q_type = None
 
-# State Game Kompetisi Waktu
+# State Kompetisi
 if 'comp_active' not in st.session_state: st.session_state.comp_active = False
 if 'comp_score' not in st.session_state: st.session_state.comp_score = 0
 if 'comp_total' not in st.session_state: st.session_state.comp_total = 0
@@ -254,7 +223,6 @@ def generate_random_triangle():
             return a, b, c
 
 def generate_quiz():
-    # Menggunakan 3 variasi: Keliling, Luas Heron (SSS), Luas Trigonometri (SAS)
     q_type = random.choice(["keliling", "luas_heron", "luas_sas"])
     st.session_state.quiz_q_type = q_type
     
@@ -275,7 +243,6 @@ def generate_quiz():
     elif q_type == "luas_sas":
         a = random.randint(3, 15)
         b = random.randint(3, 15)
-        # Menggunakan Sudut Istimewa agar bagus untuk mental math siswa
         angle = random.choice([30, 45, 60, 90, 120, 135, 150]) 
         st.session_state.quiz_data = (a, b, angle)
         st.session_state.quiz_q = f"Sisi: **a={a}, b={b}** dan Sudut Apit **C={angle}°**. LUAS = ? *(Bulat)*"
@@ -286,7 +253,7 @@ def start_competition():
     st.session_state.comp_active = True
     st.session_state.comp_score = 0
     st.session_state.comp_total = 0
-    st.session_state.comp_end_time = time.time() + 300 # Waktu 300 detik
+    st.session_state.comp_end_time = time.time() + 300 
     generate_comp_quiz()
 
 def generate_comp_quiz():
@@ -307,160 +274,227 @@ def generate_comp_quiz():
         ans = 0.5 * a * b * math.sin(math.radians(angle))
         st.session_state.comp_ans = str(round(ans))
 
-# --- UI UTAMA STREAMLIT ---
-st.title("📐 GeoMetric: Triangle Analyzer")
 
-with st.expander("📖 Panduan Pengguna (Klik untuk membuka)", expanded=False):
+# =========================================================================
+# 🔴 PENGATURAN UI UTAMA (PEMISAHAN NORMAL VS LOCKDOWN MODE)
+# =========================================================================
+
+if st.session_state.comp_active:
+    # --- LOCKDOWN MODE (SPEED RUN AKTIF) ---
+    # CSS Agresif: Sembunyikan semua elemen navigasi bawaan Streamlit secara paksa
     st.markdown("""
-    **Selamat Datang di GeoMetric!**
+    <style>
+        section[data-testid="stSidebar"] { display: none !important; }
+        button[data-testid="collapsedControl"] { display: none !important; }
+        button[kind="header"] { display: none !important; }
+        header[data-testid="stHeader"] { display: none !important; }
+        .stApp > header { display: none !important; }
+    </style>
+    """, unsafe_allow_html=True)
     
-    1. **Pilih Mode Input:** Gunakan dropdown di sidebar (kiri) untuk memilih jenis input (SSS, SAS, atau ASA).
-    2. **Input Data:** Masukkan nilai sisi/sudut. Visualisasi akan langsung otomatis terupdate.
-    3. **Garis Istimewa:** Centang opsi di sidebar untuk menampilkan Garis Tinggi, Berat, atau Bagi.
-    4. **Langkah Pengerjaan:** Klik tab **📝 Langkah Pengerjaan Detail** di bawah untuk melihat rincian rumus.
-    5. **Latihan & Kompetisi:** Klik tab **🎯 Mode Latihan** untuk menguji pemahaman, atau mainkan **Speed Run (300 Detik)** bersama teman kelasmu!
-    """)
-
-with st.sidebar:
-    st.header("Input Data")
-    mode = st.selectbox("Pilih Mode Input:", ["Sisi - Sisi - Sisi (SSS)", "Sisi - Sudut - Sisi (SAS)", "Sudut - Sisi - Sudut (ASA)"])
+    time_left = int(st.session_state.comp_end_time - time.time())
     
-    if "SSS" in mode:
-        v1 = st.number_input("Sisi a (BC):", min_value=0.1, value=5.0, step=0.1)
-        v2 = st.number_input("Sisi b (AC):", min_value=0.1, value=6.0, step=0.1)
-        v3 = st.number_input("Sisi c (AB):", min_value=0.1, value=7.0, step=0.1)
-    elif "SAS" in mode:
-        v1 = st.number_input("Sisi b (Kiri):", min_value=0.1, value=6.0, step=0.1)
-        v2 = st.number_input("Sudut A (Derajat):", min_value=1.0, max_value=179.0, value=60.0, step=1.0)
-        v3 = st.number_input("Sisi c (Bawah):", min_value=0.1, value=7.0, step=0.1)
-    elif "ASA" in mode:
-        v1 = st.number_input("Sudut A (Derajat):", min_value=1.0, max_value=179.0, value=45.0, step=1.0)
-        v2 = st.number_input("Sisi c (Tengah):", min_value=0.1, value=10.0, step=0.1)
-        v3 = st.number_input("Sudut B (Derajat):", min_value=1.0, max_value=179.0, value=60.0, step=1.0)
-
-    st.markdown("---")
-    st.subheader("Garis Istimewa")
-    show_alt = st.checkbox("Garis Tinggi (Altitude)")
-    show_med = st.checkbox("Garis Berat (Median)")
-    show_bis = st.checkbox("Garis Bagi (Bisector)")
-
-data, steps, err = calculate_triangle(mode, v1, v2, v3)
-
-tab1, tab2, tab3 = st.tabs(["📊 Visualisasi & Hasil", "📝 Langkah Pengerjaan Detail", "🎯 Mode Latihan & Kompetisi"])
-
-with tab1:
-    if err:
-        st.error(err)
-    elif data:
-        a, b, c, dA, dB, dC, area, peri = data
+    if time_left <= 0:
+        st.session_state.comp_active = False
+        st.rerun()
+    else:
+        st.markdown("<h1 style='text-align: center; color: #ff5555;'>🔥 MODE SPEED RUN AKTIF 🔥</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #888;'>Fokus! Semua menu dan tab lain dikunci sementara sampai waktu habis.</p>", unsafe_allow_html=True)
         
-        jenis_sisi = "Sembarang"
-        if math.isclose(a, b) and math.isclose(b, c): jenis_sisi = "Sama Sisi"
-        elif math.isclose(a, b) or math.isclose(a, c) or math.isclose(b, c): jenis_sisi = "Sama Kaki"
-        
-        jenis_sudut = "Lancip"
-        if any(math.isclose(x, 90, abs_tol=0.1) for x in [dA, dB, dC]): jenis_sudut = "Siku-siku"
-        elif any(x > 90.1 for x in [dA, dB, dC]): jenis_sudut = "Tumpul"
-
-        html_cards = f"""
-        <div style="display: flex; justify-content: space-between; gap: 15px;">
-            <div class="stat-card" style="flex: 1; border: 1px solid #bd93f9;">
-                <div class="stat-title">JENIS SEGITIGA</div>
-                <div class="stat-value val-jenis">{jenis_sudut}<br>{jenis_sisi}</div>
-            </div>
-            <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
-                <div class="stat-title">LUAS AREA</div>
-                <div class="stat-value val-angka">{area:.2f}</div>
-            </div>
-            <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
-                <div class="stat-title">KELILING</div>
-                <div class="stat-value val-angka">{peri:.2f}</div>
-            </div>
+        components.html(f"""
+        <div style="font-family: sans-serif; font-size: 28px; font-weight: bold; color: #ff5555; text-align: center; background: #2b2b2b; padding: 15px; border-radius: 8px; border: 2px solid #ff5555;">
+            ⏱️ Waktu Tersisa: <span id="timer">{time_left}</span> detik
         </div>
-        <div class="info-text">Sudut: ∠A={dA:.1f}° | ∠B={dB:.1f}° | ∠C={dC:.1f}°</div>
-        <div class="info-text" style="margin-bottom: 20px;">Sisi: a={a:.2f} | b={b:.2f} | c={c:.2f}</div>
-        """
-        st.markdown(html_cards, unsafe_allow_html=True)
+        <script>
+            var timeLeft = {time_left};
+            var timerId = setInterval(function() {{
+                timeLeft--;
+                if (timeLeft <= 0) {{
+                    clearInterval(timerId);
+                    document.getElementById("timer").innerHTML = "HABIS!";
+                }} else {{
+                    document.getElementById("timer").innerHTML = timeLeft;
+                }}
+            }}, 1000);
+        </script>
+        """, height=90)
+        
+        st.markdown(f"<div class='soal-kompetisi'>{st.session_state.comp_q}</div>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align:center; font-size: 20px;'>Skor Sementara: <b style='color:#50fa7b;'>{st.session_state.comp_score}</b> Benar</p>", unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            with st.form("comp_form", clear_on_submit=True):
+                user_ans = st.text_input("Ketik jawaban (Angka Saja) lalu tekan Enter:", autocomplete="off")
+                submitted = st.form_submit_button("Kirim Jawaban Cepat", use_container_width=True)
+                
+                if submitted:
+                    if time.time() > st.session_state.comp_end_time:
+                        st.session_state.comp_active = False
+                        st.rerun()
+                    else:
+                        st.session_state.comp_total += 1
+                        if user_ans:
+                            try:
+                                if math.isclose(float(user_ans), float(st.session_state.comp_ans), abs_tol=0.1):
+                                    st.session_state.comp_score += 1
+                            except:
+                                pass
+                        generate_comp_quiz()
+                        st.rerun()
+        
+        st.markdown("---")
+        col_a, col_b, col_c = st.columns([2,1,2])
+        with col_b:
+            if st.button("🛑 Menyerah", type="secondary", use_container_width=True):
+                st.session_state.comp_active = False
+                st.rerun()
 
-        fig = draw_triangle_plot(a, b, c, dA, dB, dC, show_alt, show_med, show_bis)
-        st.pyplot(fig)
+else:
+    # --- NORMAL MODE (TAMPILKAN SEMUA MENU) ---
+    st.title("📐 GeoMetric: Triangle Analyzer")
 
-with tab2:
-    st.header("Analisis Matematis")
-    if err:
-        st.warning("Data segitiga tidak valid.")
-    elif steps:
-        for title, color, content in steps:
-            card_html = f"""
-            <div class="step-card" style="border: 2px solid {color};">
-                <div class="step-header" style="background-color: {color};">
-                    {title}
+    with st.expander("📖 Panduan Pengguna (Klik untuk membuka)", expanded=False):
+        st.markdown("""
+        **Selamat Datang di GeoMetric!**
+        
+        1. **Pilih Mode Input:** Gunakan dropdown di sidebar (kiri) untuk memilih jenis input.
+        2. **Input Data:** Masukkan nilai sisi/sudut. Visualisasi akan otomatis terupdate.
+        3. **Garis Istimewa:** Centang opsi di sidebar untuk menampilkan garis.
+        4. **Langkah Pengerjaan:** Klik tab **📝 Langkah Pengerjaan Detail** untuk melihat rumus.
+        5. **Latihan & Kompetisi:** Uji pemahamanmu, atau mainkan **Speed Run (300 Detik)**!
+        """)
+
+    with st.sidebar:
+        st.header("Input Data")
+        mode = st.selectbox("Pilih Mode Input:", ["Sisi - Sisi - Sisi (SSS)", "Sisi - Sudut - Sisi (SAS)", "Sudut - Sisi - Sudut (ASA)"])
+        
+        if "SSS" in mode:
+            v1 = st.number_input("Sisi a (BC):", min_value=0.1, value=5.0, step=0.1)
+            v2 = st.number_input("Sisi b (AC):", min_value=0.1, value=6.0, step=0.1)
+            v3 = st.number_input("Sisi c (AB):", min_value=0.1, value=7.0, step=0.1)
+        elif "SAS" in mode:
+            v1 = st.number_input("Sisi b (Kiri):", min_value=0.1, value=6.0, step=0.1)
+            v2 = st.number_input("Sudut A (Derajat):", min_value=1.0, max_value=179.0, value=60.0, step=1.0)
+            v3 = st.number_input("Sisi c (Bawah):", min_value=0.1, value=7.0, step=0.1)
+        elif "ASA" in mode:
+            v1 = st.number_input("Sudut A (Derajat):", min_value=1.0, max_value=179.0, value=45.0, step=1.0)
+            v2 = st.number_input("Sisi c (Tengah):", min_value=0.1, value=10.0, step=0.1)
+            v3 = st.number_input("Sudut B (Derajat):", min_value=1.0, max_value=179.0, value=60.0, step=1.0)
+
+        st.markdown("---")
+        st.subheader("Garis Istimewa")
+        show_alt = st.checkbox("Garis Tinggi (Altitude)")
+        show_med = st.checkbox("Garis Berat (Median)")
+        show_bis = st.checkbox("Garis Bagi (Bisector)")
+
+    data, steps, err = calculate_triangle(mode, v1, v2, v3)
+
+    tab1, tab2, tab3 = st.tabs(["📊 Visualisasi & Hasil", "📝 Langkah Pengerjaan Detail", "🎯 Mode Latihan & Kompetisi"])
+
+    with tab1:
+        if err:
+            st.error(err)
+        elif data:
+            a, b, c, dA, dB, dC, area, peri = data
+            
+            jenis_sisi = "Sembarang"
+            if math.isclose(a, b) and math.isclose(b, c): jenis_sisi = "Sama Sisi"
+            elif math.isclose(a, b) or math.isclose(a, c) or math.isclose(b, c): jenis_sisi = "Sama Kaki"
+            
+            jenis_sudut = "Lancip"
+            if any(math.isclose(x, 90, abs_tol=0.1) for x in [dA, dB, dC]): jenis_sudut = "Siku-siku"
+            elif any(x > 90.1 for x in [dA, dB, dC]): jenis_sudut = "Tumpul"
+
+            html_cards = f"""
+            <div style="display: flex; justify-content: space-between; gap: 15px;">
+                <div class="stat-card" style="flex: 1; border: 1px solid #bd93f9;">
+                    <div class="stat-title">JENIS SEGITIGA</div>
+                    <div class="stat-value val-jenis">{jenis_sudut}<br>{jenis_sisi}</div>
                 </div>
-                <div class="step-body">
-                    {content}
+                <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
+                    <div class="stat-title">LUAS AREA</div>
+                    <div class="stat-value val-angka">{area:.2f}</div>
+                </div>
+                <div class="stat-card" style="flex: 1; border: 1px solid #8be9fd;">
+                    <div class="stat-title">KELILING</div>
+                    <div class="stat-value val-angka">{peri:.2f}</div>
                 </div>
             </div>
             """
-            st.markdown(card_html, unsafe_allow_html=True)
+            st.markdown(html_cards, unsafe_allow_html=True)
 
-with tab3:
-    pilihan_mode = st.radio("Pilih Tipe Latihan:", ["Latihan Santai (Ada Pembahasan)", "Speed Run (Kompetisi 300 Detik)"], horizontal=True)
-    
-    st.markdown("---")
+            fig = draw_triangle_plot(a, b, c, dA, dB, dC, show_alt, show_med, show_bis)
+            st.pyplot(fig)
 
-    if pilihan_mode == "Latihan Santai (Ada Pembahasan)":
-        if st.button("Generate Soal Baru", on_click=generate_quiz):
-            pass 
-            
-        if st.session_state.quiz_q:
-            st.info(st.session_state.quiz_q)
-            
-            with st.form("form_latihan", clear_on_submit=True):
-                user_ans = st.text_input("Jawaban (Angka Saja):", autocomplete="off")
-                submitted = st.form_submit_button("Kirim Jawaban")
+    with tab2:
+        st.header("Analisis Matematis")
+        if err:
+            st.warning("Data segitiga tidak valid.")
+        elif steps:
+            for title, color, content in steps:
+                card_html = f"""
+                <div class="step-card" style="border: 2px solid {color};">
+                    <div class="step-header" style="background-color: {color};">
+                        {title}
+                    </div>
+                    <div class="step-body">
+                        {content}
+                    </div>
+                </div>
+                """
+                st.markdown(card_html, unsafe_allow_html=True)
+
+    with tab3:
+        pilihan_mode = st.radio("Pilih Tipe Latihan:", ["Latihan Santai (Ada Pembahasan)", "Speed Run (Kompetisi 300 Detik)"], horizontal=True)
+        st.markdown("---")
+
+        if pilihan_mode == "Latihan Santai (Ada Pembahasan)":
+            if st.button("Generate Soal Baru", on_click=generate_quiz):
+                pass 
                 
-                if submitted:
-                    if not user_ans:
-                        st.warning("Mohon masukkan jawaban terlebih dahulu.")
-                    else:
-                        try:
-                            is_correct = False
-                            ans_correct = st.session_state.quiz_ans
-                            
-                            if math.isclose(float(user_ans), float(ans_correct), abs_tol=0.1):
-                                is_correct = True
-                                    
-                            if is_correct:
-                                st.success("✅ Tepat Sekali!")
-                            else:
-                                st.error(f"❌ Kurang tepat. Jawaban yang benar adalah: {ans_correct}")
-                            
-                            # --- PEMBAHASAN DETAIL ---
-                            q_type = st.session_state.quiz_q_type
-                            
-                            st.markdown("### 💡 Pembahasan Detail:")
-                            
-                            if q_type == "keliling":
-                                a, b, c = st.session_state.quiz_data
-                                st.info(f"**Rumus Keliling** = a + b + c = {a} + {b} + {c} = **{ans_correct}**")
+            if st.session_state.quiz_q:
+                st.info(st.session_state.quiz_q)
+                
+                with st.form("form_latihan", clear_on_submit=True):
+                    user_ans = st.text_input("Jawaban (Angka Saja):", autocomplete="off")
+                    submitted = st.form_submit_button("Kirim Jawaban")
+                    
+                    if submitted:
+                        if not user_ans:
+                            st.warning("Mohon masukkan jawaban terlebih dahulu.")
+                        else:
+                            try:
+                                is_correct = False
+                                ans_correct = st.session_state.quiz_ans
                                 
-                            elif q_type == "luas_heron":
-                                a, b, c = st.session_state.quiz_data
-                                s = (a + b + c) / 2
-                                luas_asli = math.sqrt(s * (s - a) * (s - b) * (s - c))
-                                st.info(f"**Cari (s):** ({a} + {b} + {c}) / 2 = **{s}** \n\n **Rumus Heron:** √[{s} · ({s}-{a}) · ({s}-{b}) · ({s}-{c})] ≈ {luas_asli:.2f} \n\n **Dibulatkan:** **{ans_correct}**")
+                                if math.isclose(float(user_ans), float(ans_correct), abs_tol=0.1):
+                                    is_correct = True
+                                        
+                                if is_correct:
+                                    st.success("✅ Tepat Sekali!")
+                                else:
+                                    st.error(f"❌ Kurang tepat. Jawaban yang benar adalah: {ans_correct}")
                                 
-                            elif q_type == "luas_sas":
-                                a, b, angle = st.session_state.quiz_data
-                                luas_asli = 0.5 * a * b * math.sin(math.radians(angle))
-                                st.info(f"**Rumus Luas (Trigonometri):** 1/2 × a × b × sin(C) \n\n = 1/2 × {a} × {b} × sin({angle}°) \n\n ≈ {luas_asli:.2f} \n\n **Dibulatkan:** **{ans_correct}**")
-
-                        except ValueError:
-                            st.warning("Mohon masukkan hanya angka yang valid.")
-                            
-    else:
-        # MODE KOMPETISI WAKTU
-        if not st.session_state.comp_active:
+                                q_type = st.session_state.quiz_q_type
+                                st.markdown("### 💡 Pembahasan Detail:")
+                                
+                                if q_type == "keliling":
+                                    a, b, c = st.session_state.quiz_data
+                                    st.info(f"**Rumus Keliling** = a + b + c = {a} + {b} + {c} = **{ans_correct}**")
+                                elif q_type == "luas_heron":
+                                    a, b, c = st.session_state.quiz_data
+                                    s = (a + b + c) / 2
+                                    luas_asli = math.sqrt(s * (s - a) * (s - b) * (s - c))
+                                    st.info(f"**Cari (s):** ({a} + {b} + {c}) / 2 = **{s}** \n\n **Rumus Heron:** √[{s} · ({s}-{a}) · ({s}-{b}) · ({s}-{c})] ≈ {luas_asli:.2f} \n\n **Dibulatkan:** **{ans_correct}**")
+                                elif q_type == "luas_sas":
+                                    a, b, angle = st.session_state.quiz_data
+                                    luas_asli = 0.5 * a * b * math.sin(math.radians(angle))
+                                    st.info(f"**Rumus Luas (Trigonometri):** 1/2 × a × b × sin(C) \n\n = 1/2 × {a} × {b} × sin({angle}°) \n\n ≈ {luas_asli:.2f} \n\n **Dibulatkan:** **{ans_correct}**")
+                            except ValueError:
+                                st.warning("Mohon masukkan hanya angka yang valid.")
+                                
+        else:
             st.markdown("<h3 style='text-align: center;'>Bersiaplah! Kamu punya waktu 300 detik.</h3>", unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1,2,1])
             with col2:
@@ -470,51 +504,3 @@ with tab3:
             
             if st.session_state.comp_total > 0:
                 st.success(f"🏆 PERMAINAN SELESAI! Skor Terakhir Kamu: **{st.session_state.comp_score} BENAR** dari {st.session_state.comp_total} soal.")
-        
-        else:
-            time_left = int(st.session_state.comp_end_time - time.time())
-            
-            if time_left <= 0:
-                st.session_state.comp_active = False
-                st.rerun()
-            else:
-                components.html(f"""
-                <div style="font-family: sans-serif; font-size: 28px; font-weight: bold; color: #ff5555; text-align: center; background: #2b2b2b; padding: 15px; border-radius: 8px; border: 2px solid #ff5555;">
-                    ⏱️ Waktu Tersisa: <span id="timer">{time_left}</span> detik
-                </div>
-                <script>
-                    var timeLeft = {time_left};
-                    var timerId = setInterval(function() {{
-                        timeLeft--;
-                        if (timeLeft <= 0) {{
-                            clearInterval(timerId);
-                            document.getElementById("timer").innerHTML = "HABIS!";
-                        }} else {{
-                            document.getElementById("timer").innerHTML = timeLeft;
-                        }}
-                    }}, 1000);
-                </script>
-                """, height=90)
-                
-                st.markdown(f"<div class='soal-kompetisi'>{st.session_state.comp_q}</div>", unsafe_allow_html=True)
-                st.markdown(f"<p style='text-align:center;'>Skor Sementara: <b>{st.session_state.comp_score}</b> Benar</p>", unsafe_allow_html=True)
-                
-                with st.form("comp_form", clear_on_submit=True):
-                    user_ans = st.text_input("Ketik jawaban (Angka Saja) lalu tekan Enter:", autocomplete="off")
-                    submitted = st.form_submit_button("Kirim Jawaban Cepat")
-                    
-                    if submitted:
-                        if time.time() > st.session_state.comp_end_time:
-                            st.session_state.comp_active = False
-                            st.rerun()
-                        else:
-                            st.session_state.comp_total += 1
-                            if user_ans:
-                                try:
-                                    if math.isclose(float(user_ans), float(st.session_state.comp_ans), abs_tol=0.1):
-                                        st.session_state.comp_score += 1
-                                except:
-                                    pass
-                                    
-                            generate_comp_quiz()
-                            st.rerun()
